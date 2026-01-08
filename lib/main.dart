@@ -53,29 +53,43 @@ class _CounterPageState extends State<CounterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: _counter,
-      builder: (context, _) {
-        return Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('${_counter.count}', style: const TextStyle(fontSize: 48)),
-                const SizedBox(height: 16),
-                Text(
-                  _counter.getMessage(),
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ],
-            ),
+  // 1. 更新されない「土台（Scaffold）」は外に置く
+  return Scaffold(
+    appBar: AppBar(title: const Text('カウンター')), // AppBarも再構築されない
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('現在のカウント値:'), // このテキストは固定なので外でOK
+
+          // 2. 「ここだけ更新したい！」という部分だけを ListenableBuilder で囲む
+          ListenableBuilder(
+            listenable: _counter,
+            builder: (context, _) {
+              // _counter.notifyListeners() が呼ばれると、ここから下だけが動く
+              return Column(
+                children: [
+                  Text(
+                    '${_counter.count}',
+                    style: const TextStyle(fontSize: 48),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _counter.getMessage(),
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                ],
+              );
+            },
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _counter.increment,
-            child: const Icon(Icons.add),
-          ),
-        );
-      },
-    );
-  }
+        ],
+      ),
+    ),
+    // 3. ボタンも「中身のアイコン」は変わらないので外に置く
+    floatingActionButton: FloatingActionButton(
+      onPressed: _counter.increment,
+      child: const Icon(Icons.add),
+    ),
+  );
+}
 }
